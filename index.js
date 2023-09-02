@@ -1,78 +1,59 @@
+// Import the necessary libraries and modules
 const inquirer = require("inquirer");
-const fs = require("fs");
-// const { Circle, Square, Triangle } = require("./lib/shape.js");
+const { writeFile } = require("fs");
+const { svgGen } = require("./lib/svgGen");
+
+// Import the shape classes from separate files
 const Circle = require("./lib/circle");
 const Square = require("./lib/square");
 const Triangle = require("./lib/triangle");
 
-async function getUserInput() {
-  try {
-    const userInput = await inquirer.prompt([
-      {
-        type: "input",
-        name: "text",
-        message: "Enter up to three characters for the logo:",
-        validate: (input) => {
-          return input.length <= 3;
-        },
+// Use Inquirer to gather user input for creating a logo
+inquirer
+  .prompt([
+    {
+      type: "input",
+      name: "text",
+      message: "Enter up to three characters for the logo:", // Ask for logo text input
+      validate: (input) => {
+        return input.length <= 3; // Validate that the input is not longer than 3 characters
       },
-      {
-        type: "input",
-        name: "textColor",
-        message: "Enter the text color (keyword or hexadecimal):",
-      },
-      {
-        type: "list",
-        name: "shape",
-        message: "Select a shape:",
-        choices: ["Circle", "Square", "Triangle"],
-      },
-      {
-        type: "input",
-        name: "shapeColor",
-        message: "Enter the shape color (keyword or hexadecimal):",
-      },
-    ]);
+    },
+    {
+      type: "input",
+      name: "textColor",
+      message: "Enter the text color (keyword or hexadecimal):", // Ask for text color input
+    },
+    {
+      type: "list",
+      name: "shape",
+      message: "Select a shape:", // Ask the user to choose a shape
+      choices: ["Circle", "Square", "Triangle"], // Provide shape choices
+    },
+    {
+      type: "input",
+      name: "shapeColor",
+      message: "Enter the shape color (keyword or hexadecimal):", // Ask for shape color input
+    },
+  ])
 
-    return userInput;
-  } catch (error) {
-    console.error("Error getting user input:", error);
-  }
-}
-
-function generateSVG(userInput) {
-  try {
-    let shape;
-
-    switch (userInput.shape) {
+  .then((response) => {
+    // Determine which shape the user selected and create an instance of it
+    let shapeChoice;
+    switch (response.shape) {
       case "Circle":
-        shape = new Circle(userInput.shapeColor);
+        shapeChoice = new Circle(response.shapeColor).render();
         break;
       case "Square":
-        shape = new Square(userInput.shapeColor);
+        shapeChoice = new Square(response.shapeColor).render();
         break;
       case "Triangle":
-        shape = new Triangle(userInput.shapeColor);
-        break;
-      default:
-        console.error("Invalid shape selection.");
-        process.exit(1);
+        shapeChoice = new Triangle(response.shapeColor).render();
     }
 
-    shape.setText(userInput.text);
-    const svg = shape.render();
-
-    fs.writeFileSync("logo.svg", svg);
-
-    console.log("Generated logo.svg");
-  } catch (error) {
-    console.error("Error generating SVG:", error);
-  }
-}
-
-async function main() {
-  const userInput = await getUserInput();
-  generateSVG(userInput);
-}
-
-main();
+    // Generate an SVG logo based on user choices and save it to a file
+    const newSvg = svgGen(shapeChoice, response.textColor, response.text);
+    writeFile("./examples/logo.svg", newSvg, () => {
+      console.log("Generated logo.svg"); // Notify the user that the logo was generated
+    });
+  });
