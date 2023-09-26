@@ -1,7 +1,8 @@
 # SVG_logoMaker
 -----
 ## Description
-This is a back end application for an e-commerce site. It uses Express.js API and Sequelize to interact with a MySQL database.
+This is a Node.js command-line application that takes in user input to generate a logo and save it as an SVG fileLinks to an external site.. The application prompts the user to select a color and shape, provide text for the logo, and save the generated SVG to a .svg file.
+
 
 
 -----
